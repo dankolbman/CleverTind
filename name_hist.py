@@ -7,7 +7,7 @@ import matplotlib
 
 font = {'family' : 'normal',
         'weight' : 'bold',
-        'size'   : 32}
+        'size'   : 28}
 
 matplotlib.rc('font', **font)
 
@@ -28,9 +28,10 @@ def main( path ):
   yt = np.arange(N)
   yt = yt[::-1]
 
-  fig.set_size_inches(8,16)
-  rects1 = ax.barh( yt, pct[0:N], h, color='b', alpha=0.5)
-  rects1 = ax.barh( yt, pct[0:N], h, color='none', lw=5)
+  fig.set_size_inches(7,9)
+  rects1 = ax.barh( yt, pct[0:N], h, color='#1FB3F2', alpha=1.0, lw=0)
+  #rects1 = ax.barh( yt, pct[0:N], h, color='r', alpha=0.3, hatch='///')
+  #rects1 = ax.barh( yt, pct[0:N], h, color='none', lw=5)
 
 
   ax.set_yticks(yt+0.3)
@@ -41,17 +42,18 @@ def main( path ):
   ax.set_xticklabels( ['0%', '0.5%', '1%', '1.5%'] )
 
   for i in range(N):
-    plt.text(0.04, N-i-0.85, names[i])
-    plt.text(pct[i]+0.03, N-i-0.85, str(round(pct[i]*100.0)/100.0)+'%')
+    plt.text(0.04, N-i-0.85, names[i], fontsize=22)
+    plt.text(pct[i]+0.03, N-i-0.85, str(round(pct[i]*100.0)/100.0)+'%', fontsize=22)
 
   plt.xlim(0.0, 1.8)
+  plt.ylim(-0.25, N)
 
   plt.ylabel('Rank')
   plt.xlabel('Percent of Users')
   plt.tight_layout()
 
   
-  plt.savefig('names.png', dpi=100)
+  plt.savefig('names.png', dpi=100, transparent=True)
 
   plt.show()
         
