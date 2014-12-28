@@ -92,11 +92,11 @@ def likeEveryone(pyro, bot)
         sleep(30)
         recs = pyro.get_nearby_users
         profiles = recs["results"]
-        end
+      end
 
 
-        # Iterate each profile
-        for p in profiles
+      # Iterate each profile
+      for p in profiles
         puts "Liking "+p["name"]
 
         # User id
@@ -110,43 +110,29 @@ def likeEveryone(pyro, bot)
         f.write("#{p["_id"]}\n")
         end
 
+        # Save picture
         begin
-        File.open("profiles/"+id+"/"+p["photos"][0]["fileName"], "wb") do |f| 
-        f.write HTTParty.get(p["photos"][0]["processedFiles"][0]["url"]).parsed_response
+          File.open("profiles/"+id+"/"+p["photos"][0]["fileName"], "wb") do |f| 
+          f.write HTTParty.get(p["photos"][0]["processedFiles"][0]["url"]).parsed_response
         end
         rescue Exception => msg
-        puts "Couldn't retrieve picture"
+          puts "Couldn't retrieve picture"
         end
 
-# Iterate and download photos
-#for photo in p["photos"]
-#  File.open("profiles/"+id+"/"+photo["fileName"], "wb") do |f| 
-#    f.write HTTParty.get(photo["processedFiles"][0]["url"]).parsed_response
-#  end
-#end
+        File.open("profiles/"+id+"/profile.json", 'w') do |f|
+        f.write(p)
+      end
 
-#File.open("profiles/"+id+"/about.txt", 'w') do |f|
-#  f.write(p["name"]+"\n")
-#  f.write("#{p["id"]}\n")
-#  f.write("#{p["birth_date"]}\n")
-#  f.write("#{p["distance_mi"]}\n")
-#  f.write(p["bio"])
-#end
+      # Like her!
+      pyro.like(id)
+      liked += 1
 
-  File.open("profiles/"+id+"/profile.json", 'w') do |f|
-f.write(p)
-  end
+    end
 
-# Like her!
-pyro.like(id)
-  liked += 1
-
-  end
-
-  puts "Like #{liked} profiles so far!!!"
-#puts "UPDATES"
-#puts pyro.fetch_updates
-      
+    puts "Like #{liked} profiles so far!!!"
+    #puts "UPDATES"
+    #puts pyro.fetch_updates
+        
     rescue Exception => msg
       puts "Error!!!!"
       puts msg
@@ -167,49 +153,57 @@ def update(pyro, bot)
   updates = pyro.fetch_updates($last_update)
   # remember when we last updated to avoid repeatedly fetching the same updates
   $last_update = Time.now-2
-  # We have new messages to respond to
+
+  #puts JSON.pretty_generate(updates)
+
+  # We have new messages or new matches
   if updates["matches"] != nil and updates["matches"].length > 0   then
-    #for new_match in updates["people"]
-    begin
-      for matches in updates["matches"]
-        #if matches["messages"] != nil and matches["messages"].length >= 0 then
-        if matches["messages"] != nil and matches["messages"].length > 0 then
-          user_id = matches["messages"][-1]["from"]
+    # Iterate every new match update
+    for match in updates["matches"]
+
+      # Check if we have a conversation going
+      if match["messages"].length > 0 then
+
+        # Check if the last message was to me
+        if match["messages"][-1]["to"] == $me then
           
-          user_name  = pyro.info_for_user(user_id)["results"]["name"]
-          #puts "Last message: "+matches["messages"][-1]["message"]
-          # Chat if the last message is addressed to me
-          if matches["messages"][-1]["to"] == $me then
+          # Respond to the last message
+          # We don't get anything but the user's id for existing conversations
+          user_name  = pyro.info_for_user(match["messages"][-1]["from"])
+          # Check that user still exists
+          if user_name["status"] != "500" then
+            user_name = user_name["results"]["name"]
             puts "--- #{user_name} said:"
-            message = matches["messages"][-1]["message"]
+            message = match["messages"][-1]["message"]
             puts "\"#{message}\""
             # Think of a response
-            puts "-- Cleverbot said:"
+            puts "-- Cleverbot responded:"
             reply = cleverResponse(bot, message)
-            pyro.send_message(matches["_id"], reply)      
+            pyro.send_message(match["_id"], reply)      
             puts "\"#{reply}\""
           end
-        # Start a new conversation
-        elsif matches["messages"]==nil
-          user_name = matches["person"]["name"]
-          puts user_name
-          puts "--- Starting a conversation with "+user_name
-          puts "-- Cleverbot said:"
-          reply = "#{msgs[rng.rand(msgs.length)]}#{user_name}!"
-          if rng.rand(100) > 110 then
-            reply = cleverResponse(bot, user_name)
-          end
-          puts "\"#{reply}\""
-          pyro.send_message(matches["_id"], reply)      
+
         end
+
+      else # Start a new conversation
+        # We get the person's profile if we haven't sent them any messages
+        user_name = match["person"]["name"]
+        puts user_name
+        puts "--- Starting a conversation with "+user_name
+        puts "-- Cleverbot said:"
+        reply = "#{msgs[rng.rand(msgs.length)]}#{user_name}!"
+        if rng.rand(100) > 90 then # Seed the bot on the user's name
+          reply = cleverResponse(bot, user_name)
+        end
+        puts "\"#{reply}\""
+        pyro.send_message(match["_id"], reply)      
+      
       end
-    rescue Exception => msg
-      puts msg
-      puts updates["matches"].length
+      
     end
-  else
-    puts "No updates!"
-  end 
+  end
+    
+    
 end
 
 # Have the bot come up with a response and make sure to filter it
@@ -359,12 +353,12 @@ bot = Cleverbot::Client.new
 #exit
 
 ### Find who matched with us
-puts "--- Getting our matches ---"
+puts "--- Update conversations ---"
+update(pyro, bot)
 
 #scanMatches(pyro)
 
 # Like everyone!!!
 puts "--- Liking Everyone! ---"
-update(pyro, bot)
 likeEveryone(pyro, bot)
 
