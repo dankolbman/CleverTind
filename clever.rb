@@ -88,7 +88,9 @@ def likeEveryone(pyro, bot)
       end
       
       while (recs["message"] == "recs timeout" or !profiles)
-        # Wait until users are available
+        # Update and wait until users are available
+        puts "Checking for updates"
+        update(pyro, bot)
         sleep(30)
         recs = pyro.get_nearby_users
         profiles = recs["results"]
@@ -170,8 +172,9 @@ def update(pyro, bot)
           # Respond to the last message
           # We don't get anything but the user's id for existing conversations
           user_name  = pyro.info_for_user(match["messages"][-1]["from"])
+          puts user_name.body.length
           # Check that user still exists
-          if user_name["status"] != "500" then
+          if user_name.body.length != 0 && user_name["status"] != "500" then
             user_name = user_name["results"]["name"]
             puts "--- #{user_name} said:"
             message = match["messages"][-1]["message"]
@@ -202,7 +205,8 @@ def update(pyro, bot)
       
     end
   end
-    
+
+  puts "No more updates"
     
 end
 
