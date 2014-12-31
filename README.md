@@ -14,6 +14,13 @@ training data is included here, but you can get different cascade sets
  [here](https://github.com/Itseez/opencv/tree/master/data/haarcascades)
 or even [train your own](http://docs.opencv.org/doc/user_guide/ug_traincascade.html).
 
+The `sample_data` directory contains some analyized data from more than 60,000
+profiles which I have collected. You can generate your own analysis by running 
+the bot and running through the profiles with `profile_parse.py`.
+
+The `figures` directory contains scripts for creating visualizations of the 
+parsed data.
+
 Using
 -------
 The bot requires [pyro](https://github.com/nneal/tinder_pyro),
