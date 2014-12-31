@@ -14,10 +14,28 @@ training data is included here, but you can get different cascade sets
  [here](https://github.com/Itseez/opencv/tree/master/data/haarcascades)
 or even [train your own](http://docs.opencv.org/doc/user_guide/ug_traincascade.html).
 
-Install
+Using
 -------
-The bot requires [pyro](https://github.com/nneal/tinder_pyro) and
-[cleverbot](https://github.com/benmanns/cleverbot)
+The bot requires [pyro](https://github.com/nneal/tinder_pyro),
+[cleverbot](https://github.com/benmanns/cleverbot),
+and [httparty](https://github.com/jnunemaker/httparty).
 The image averager requires `python 2.7`, `numpy`, and `openCV` (for facial
 detection)
 The quick image averager (no facial detection) requires `PIL`
+
+Generating a site
+---------
+`site_gen.rb` can be used to generate a bunch of markdown files for messages 
+history. It will place the files inside the `site` directory where there are
+some files for [Pelican](https://github.com/getpelican/pelican) to generate a 
+site. 
+You can generate the pages and then the site as follows:
+
+    ruby site_gen.rb
+    cd site
+    make html
+    make serve
+
+This will put a server on `localhost:8000` where you can view the site. See the
+[Pelican Docs](http://docs.getpelican.com/en/3.5.0/) for more info on using
+Pelican.
