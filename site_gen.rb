@@ -51,7 +51,7 @@ end
 #   pyro - the pyro insnance to interact with tinder
 #   msgs - list of messages
 #   outpath - the output path of the pages
-def makePage(pyro, msgs, outpath)
+def makePage(pyro, msgs )
 
   user_id = msgs[0]["to"]
   if user_id == $me
