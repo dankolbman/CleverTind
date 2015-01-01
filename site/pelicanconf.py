@@ -28,8 +28,8 @@ SOCIAL = ()
 
 STATIC_PATHS = ['images']
 
-THEME = 'themes/blueidea'
-THEME_STATIC_DIR = 'blueidea/static'
+THEME = 'themes/blue_idea'
+THEME_STATIC_DIR = 'blue_idea/static'
 
 DEFAULT_PAGINATION = 100
 
