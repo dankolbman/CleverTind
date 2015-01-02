@@ -125,8 +125,9 @@ def main( prof_path, output_path='output', haar_map='haarcascade_frontalface_def
         if( avg_face == None ):
           avg_face = face
         else:
+          alpha = 1.0/(float(accepted%101) + 1.0)
           # Do running average
-          alpha = 1.0/(float(accepted) + 1.0)
+          #alpha = 1.0/(float(accepted) + 1.0)
           #alpha = np.ceil(alpha*100.0)/100.0
           avg_face = cv2.addWeighted(face, alpha, avg_face, 1.0-alpha, 0.0, avg_face)
           #show_face(avg_face)
@@ -145,7 +146,8 @@ def main( prof_path, output_path='output', haar_map='haarcascade_frontalface_def
         print 'Saving Current Average'
         img_out = os.path.join(output_path, 'Average_Face_'+str(int(accepted))+'.png')
         cv2.imwrite( img_out, avg_face )
-      #avg_out = None
+      # If we want to reset the average after every 100
+      avg_face = None
   cv2.destroyAllWindows()
 
 if(len(sys.argv) < 2):
