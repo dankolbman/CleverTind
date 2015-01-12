@@ -21,9 +21,6 @@ $fb_token = ''
 # Need to remember the last time of update so we don't keep request the whole log
 $last_update = Time.now - 3000000 #  172800
 
-# Tinder id
-$me = "5430151e3d3b85840f8716ad"
-
 # Scan all swipes to see if they matched with us
 def scanMatches(pyro)
 
@@ -149,7 +146,7 @@ def update(pyro, bot)
   rng = Random.new
   msgs = Array["You're the best, ", "I think I love you, ", "I like turtles and I
     like ", "Will you marry me, ", "Mmm my shell is so hard for you ", "Can you
-    wax my shell, "]
+    wax my shell,"]
   
   # Fetch updates from two days ago
   updates = pyro.fetch_updates($last_update)
@@ -340,7 +337,8 @@ if($fb_token == '')
 end
 
 pyro = TinderPyro::Client.new
-pyro.sign_in($fb_id, $fb_token)
+# Get my Tinder ID
+$me = pyro.sign_in($fb_id, $fb_token)["user"]["_id"]
 
 # New York
 latitude = 40.7198
