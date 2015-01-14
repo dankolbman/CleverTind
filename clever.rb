@@ -207,6 +207,35 @@ def update(pyro, bot)
     
 end
 
+def revive(pyro, bot)
+  # Fetch updates from two days ago
+  updates = pyro.fetch_updates($last_update)
+  # remember when we last updated to avoid repeatedly fetching the same updates
+  $last_update = Time.now-2
+  
+  if updates["matches"] != nil and updates["matches"].length > 0   then
+    # Iterate every new match update
+    for match in updates["matches"]
+
+      # Check if we have a conversation going
+      if match["messages"] != nil && match["messages"].length > 1 then
+        sent_time = (match["messages"][-1]["timestamp"]/1000).round
+        tdiff = Time.now.to_i - sent_time
+        if( tdiff > 36 )
+
+          puts "--- Reviving conversation with #{match["person"]["name"]}"
+          puts "-- Cleverbot said:"
+          reply = cleverResponse(bot, match["messages"][-1]["message"])
+          puts "\"#{reply}\""
+          pyro.send_message(match["_id"], reply)      
+          
+        end
+      end
+
+    end
+  end
+end
+
 # Have the bot come up with a response and make sure to filter it
 def cleverResponse(bot, message)
   # Think of a response
