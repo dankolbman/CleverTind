@@ -21,52 +21,6 @@ $fb_token = ''
 # Need to remember the last time of update so we don't keep request the whole log
 $last_update = Time.now - 3000000 #  172800
 
-# Scan all swipes to see if they matched with us
-def scanMatches(pyro)
-
-  # Keep our mutual matches in a hash
-  matches = Hash.new
-  # Get ids from folder names
-  ids = getProfiles('profiles')
-
-  a = 1
-  for id in ids
-    # See if we're matched
-    profile = pyro.like(id)
-
-    # They liked us!
-    if(profile.body.length > 0  and profile["match"]!=false) then
-      # Add to the list of matches
-      matches[id] = profile
-      # The match id for the conversation
-      match_id = profile["match"]["_id"]
-
-      # Move the user's folder to a different directory so we don't scan it again
-      from = 'profiles/'+id
-      to = 'matches/'+id
-      FileUtils.mv from, to
-      # Get there photos
-      for photo in pyro.info_for_user(id)["results"]["photos"]
-        File.open("matches/"+id+"/"+photo["fileName"], "wb") do |f| 
-          f.write HTTParty.get(photo["processedFiles"][0]["url"]).parsed_response
-        end
-      end
-    else
-      # Move them to an ignore folder and maybe check later
-      from = 'profiles/'+id
-      to = 'ignore/'+id
-      FileUtils.mv from, to
-    end
-    a += 1
-    if a%100 == 1 then
-      puts "Checked #{a} profiles, #{matches.length} matches so far"
-    end
-  end
-  puts "We have #{matches.length} out of #{a}!!!!"
-  return matches
-end
-
-
 # Likes all users
 def likeEveryone(pyro, bot)
   liked = 0
@@ -257,72 +211,6 @@ def cleverResponse(bot, message)
 end
 
 # Chat with a match
-def chat(pyro, bot, match)
-
-  # The match id for the conversation
-  #match_id = match["match"]
-  user_id = match["participants"][0]
-  if user_id == $me then
-    user_id = match["participants"][1]
-  end  
-
-  user_name  = pyro.info_for_user(user_id)["results"]["name"]
-  
-  #puts match
-          
-  # First message
-  if(match["message_count"] == 0 ) then
-    puts 'Starting a conversation with '+ user_name
-    puts 'Clever bot said:'
-    #reply = cleverResponse(bot, user_name)
-    #puts reply
-    # Send it
-    #pyro.send_message(match["_id"], reply)      
-  # If the last message was addressed to me
-  elsif match["messages"][-1]["to"] == $me then
-    puts user_name+' said:'
-    puts matches["messages"][-1]["message"]
-    puts "Clever bot responded with:"
-    #reply = cleverResponse(bot, match["messages"][-1]["message"])
-    #puts reply
-    # Send it
-    #pyro.send_message(match["_id"], reply)      
-  end
-
-end
-
-# Look through matches and find recent conversations
-def updateConvos(pyro, bot)
-  puts pyro.fetch_updates
-  # Get our current matches
-  ids = getProfiles('matches')
-  puts "Found #{ids.length} matches to update"
-  updates = 0
-  for id in ids[0..30]
-    # Update match
-    match = pyro.like(id)
-    if(match.body.length > 0  and match["match"]!=false) then
-      match = match["match"]
-      # Check when the match was last active
-      last_active = match["last_activity_date"]
-      last_active = Time.parse(last_active)
-      t_diff = Time.now - last_active
-      # Match was active in last two days
-      if t_diff < 200000 then
-        chat(pyro, bot, match)
-        updates += 1
-      else
-        from = 'matches/'+id
-        to = 'stale/'+id
-        FileUtils.mv from, to
-      end
-    end
-  end
-  puts pyro.fetch_updates
-  puts "Updated #{updates} matches out of #{ids.length}"
-
-end
-
 # Loads profile ids from a folder
 def getProfiles(path)
   # Get folder names
